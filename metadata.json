@@ -1,0 +1,5 @@
+{
+  "name": "Order Message Generator",
+  "description": "A simple mobile-first application to generate and copy formatted invoice text. Input seller, product, and buyer details to create a shareable text summary for your clipboard.",
+  "requestFramePermissions": []
+}
