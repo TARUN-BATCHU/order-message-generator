@@ -3,7 +3,7 @@ import { loadMerchants, loadProducts } from './constants';
 import type { InvoiceRow, SelectOption, InvoiceItem, Merchant, Product } from './types';
 import { InvoiceTableRow } from './components/BuyerForm';
 import { Toast } from './components/Toast';
-import { ClipboardIcon, PlusIcon, RefreshIcon, WhatsAppIcon, XIcon } from './components/icons';
+import { ClipboardIcon, PlusIcon, RefreshIcon, WhatsAppIcon, XIcon, MenuIcon } from './components/icons';
 import { SearchableSelect } from './components/SearchableSelect';
 import { MultiSelect } from './components/MultiSelect';
 import { ConfirmModal } from './components/ConfirmModal';
@@ -15,7 +15,7 @@ const App: React.FC = () => {
   
   const initialInvoiceRows = useMemo(() => [{ id: Date.now(), customerId: '', items: {} }], []);
   
-  const [selectedMerchantId, setSelectedMerchantId] = useState<string>(merchants.length > 0 ? merchants[0].id : '');
+  const [selectedMerchantId, setSelectedMerchantId] = useState<string>('');
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [productRates, setProductRates] = useState<{[productId: string]: string}>({});
   const [invoiceRows, setInvoiceRows] = useState<InvoiceRow[]>(initialInvoiceRows);
@@ -23,6 +23,9 @@ const App: React.FC = () => {
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [excludedCities, setExcludedCities] = useState<Set<string>>(new Set());
   const [showCities, setShowCities] = useState(false);
+  const [currentPage, setCurrentPage] = useState<'order' | 'gst'>('order');
+  const [sideNavOpen, setSideNavOpen] = useState(false);
+  const [selectedGstMerchantId, setSelectedGstMerchantId] = useState<string>('');
 
   const selectedProducts = useMemo(
     () => products.filter(p => selectedProductIds.includes(p.id)),
@@ -98,14 +101,13 @@ const App: React.FC = () => {
   };
 
   const handleClearAll = () => {
-    if (merchants.length > 0) {
-      setSelectedMerchantId(merchants[0].id);
-    }
+    setSelectedMerchantId('');
     setSelectedProductIds([]);
     setProductRates({});
     setInvoiceRows(initialInvoiceRows);
     setExcludedCities(new Set());
     setShowCities(false);
+    setSelectedGstMerchantId('');
     setIsClearModalOpen(false);
   };
   
@@ -184,14 +186,98 @@ const App: React.FC = () => {
     window.open(whatsappUrl, '_blank');
   };
 
+  const generateGstText = () => {
+    const merchant = merchants.find(m => m.id === selectedGstMerchantId);
+    if (!merchant) return "Please select a merchant.";
+    
+    let text = `📋 *MERCHANT DETAILS* 📋\n\n`;
+    text += `🏢 *NAME* : ${merchant.name.toUpperCase()}\n`;
+    text += `🧾 *GST* : ${merchant.gstin.toUpperCase()}\n`;
+    text += `📍 *ADDRESS* : ${merchant.address.toUpperCase()}\n`;
+    text += `📞 *PHONE* : ${merchant.phone}`;
+    if (merchant.phone2) {
+      text += `, ${merchant.phone2}`;
+    }
+    text += `\n\n✨ *SIRI BROKERS* ✨`;
+    
+    return text;
+  };
+
+  const handleGstCopy = () => {
+    const gstText = generateGstText();
+    navigator.clipboard.writeText(gstText).then(() => {
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+      alert('Failed to copy text. Please try again.');
+    });
+  };
+
+  const handleGstWhatsApp = () => {
+    const gstText = generateGstText();
+    const encodedText = encodeURIComponent(gstText);
+    const whatsappUrl = `https://wa.me/?text=${encodedText}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans">
+      {/* Side Navigation */}
+      {sideNavOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="fixed inset-0 bg-black opacity-50" onClick={() => setSideNavOpen(false)}></div>
+          <div className="relative bg-white dark:bg-slate-800 w-64 h-full shadow-lg">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Menu</h2>
+                <button onClick={() => setSideNavOpen(false)} className="text-slate-500 hover:text-slate-700">
+                  <XIcon className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            <nav className="p-4">
+              <button
+                onClick={() => { setCurrentPage('order'); setSideNavOpen(false); }}
+                className={`w-full text-left p-3 rounded-lg mb-2 transition-colors ${
+                  currentPage === 'order' 
+                    ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300' 
+                    : 'hover:bg-slate-100 dark:hover:bg-slate-700'
+                }`}
+              >
+                📋 Order Message
+              </button>
+              <button
+                onClick={() => { setCurrentPage('gst'); setSideNavOpen(false); }}
+                className={`w-full text-left p-3 rounded-lg transition-colors ${
+                  currentPage === 'gst' 
+                    ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300' 
+                    : 'hover:bg-slate-100 dark:hover:bg-slate-700'
+                }`}
+              >
+                🧾 GST Details
+              </button>
+            </nav>
+          </div>
+        </div>
+      )}
+      
       <div className="container mx-auto p-4 max-w-5xl pb-48">
         <header className="text-center mt-2 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <button 
+              onClick={() => setSideNavOpen(true)}
+              className="p-2 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+            >
+              <MenuIcon />
+            </button>
+            <div className="flex-1"></div>
+          </div>
           <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">SIRI BROKERS</h1>
           <p className="text-indigo-600 dark:text-indigo-400 mt-2 font-semibold">connecting buyers and sellers</p>
         </header>
 
+        {currentPage === 'order' ? (
         <main className="space-y-8">
           <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-lg space-y-6">
               <div>
@@ -200,7 +286,7 @@ const App: React.FC = () => {
                     options={merchants}
                     value={selectedMerchantId}
                     onChange={(id) => setSelectedMerchantId(id)}
-                    placeholder="Search for a merchant..."
+                    placeholder="Select seller"
                 />
               </div>
               <div>
@@ -276,6 +362,66 @@ const App: React.FC = () => {
             </button>
           </div>
         </main>
+        ) : (
+        <main className="space-y-8">
+        <center><b><h1>GST DETAILS</h1></b></center>
+          <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-lg space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Search Merchant</label>
+              <SearchableSelect
+                options={merchants}
+                value={selectedGstMerchantId}
+                onChange={(id) => setSelectedGstMerchantId(id)}
+                placeholder="Select merchant for GST details"
+              />
+            </div>
+            
+            {selectedGstMerchantId && (() => {
+              const merchant = merchants.find(m => m.id === selectedGstMerchantId);
+              return merchant ? (
+                <div className="bg-slate-50 dark:bg-slate-700 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-4 text-slate-800 dark:text-slate-200">Merchant Details</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Name:</span>
+                      <p className="text-slate-800 dark:text-slate-200 font-medium">{merchant.name}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">GST Number:</span>
+                      <p className="text-slate-800 dark:text-slate-200 font-mono">{merchant.gstin || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Address:</span>
+                      <p className="text-slate-800 dark:text-slate-200">{merchant.address}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Phone:</span>
+                      <p className="text-slate-800 dark:text-slate-200">{merchant.phone}{merchant.phone2 ? `, ${merchant.phone2}` : ''}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 grid grid-cols-2 gap-3">
+                    <button
+                      onClick={handleGstCopy}
+                      className="flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:scale-105"
+                    >
+                      <ClipboardIcon />
+                      Copy
+                    </button>
+                    <button
+                      onClick={handleGstWhatsApp}
+                      className="flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all transform hover:scale-105"
+                    >
+                      <WhatsAppIcon />
+                      Share
+                    </button>
+                  </div>
+                </div>
+              ) : null;
+            })()}
+          </div>
+        </main>
+        )}
         
         <footer className="fixed bottom-0 left-0 right-0 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm border-t border-slate-200 dark:border-slate-700">
             <div className="max-w-5xl mx-auto">

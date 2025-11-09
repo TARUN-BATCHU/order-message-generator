@@ -34,12 +34,12 @@ export const InvoiceTableRow: React.FC<InvoiceTableRowProps> = ({ row, serialNum
       <td className="p-3 align-top">
         <div className="flex items-start space-x-3">
           <span className="pt-2 font-medium text-slate-900 dark:text-white">{serialNumber}.</span>
-          <div className="flex-1">
+          <div className="flex-1 min-w-[200px]">
             <SearchableSelect
               options={customers}
               value={row.customerId}
               onChange={handleCustomerChange}
-              placeholder="Search for a buyer..."
+              placeholder="Select buyer"
               wide={true}
             />
           </div>
