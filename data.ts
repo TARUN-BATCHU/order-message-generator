@@ -136,7 +136,7 @@ export const MERCHANTS: Merchant[] = [
  { id: '133', name: 'LAKSHMI VENKATESWARA KIRANA', gstin: '36AL6PB8451R3ZI', address: 'KALLURU', phone: '9491109499', phone2: '' },
  { id: '134', name: 'SRI ANJANEYA GENERAL MERCHANTS', gstin: '', address: 'KANCHICHARLA', phone: '', phone2: '' },
  { id: '135', name: 'RK TRADERS', gstin: '36BJNPP3535J1ZR', address: 'KOTHAGUDAM', phone: '', phone2: '' },
- { id: '136', name: 'SRI MAHA GANAPATHI TRADING COMPANY', gstin: '37ACBPM6513B1Z1', address: 'KANKIPADU', phone: '8008333355', phone2: '' },
+ { id: '136', name: 'SRI MAHA GANAPATHI TRADING COMPANY', gstin: '37AHDPM6636J1Z0', address: 'KANKIPADU', phone: '8008333355', phone2: '' },
  { id: '137', name: 'RADHA KRISHNA KIRANA & GEN STORES', gstin: '37BAUPK4243C1ZM', address: 'KANKIPADU', phone: '9848520795', phone2: '' },
  { id: '138', name: 'SATYANARAYANA KIRANA & GEN STORES', gstin: '', address: 'KANKIPADU', phone: '', phone2: '' },
  { id: '139', name: 'CHIDELLA KRISHNA MURTHY', gstin: '36AMEPC2107Q1Z4', address: 'KODADA', phone: '', phone2: '' },
