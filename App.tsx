@@ -23,9 +23,11 @@ const App: React.FC = () => {
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [excludedCities, setExcludedCities] = useState<Set<string>>(new Set());
   const [showCities, setShowCities] = useState(false);
-  const [currentPage, setCurrentPage] = useState<'order' | 'gst'>('order');
+  const [currentPage, setCurrentPage] = useState<'order' | 'gst' | 'merchants'>('order');
   const [sideNavOpen, setSideNavOpen] = useState(false);
   const [selectedGstMerchantId, setSelectedGstMerchantId] = useState<string>('');
+  const [selectedAddresses, setSelectedAddresses] = useState<string[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>('');
 
   const selectedProducts = useMemo(
     () => products.filter(p => selectedProductIds.includes(p.id)),
@@ -108,6 +110,8 @@ const App: React.FC = () => {
     setExcludedCities(new Set());
     setShowCities(false);
     setSelectedGstMerchantId('');
+    setSelectedAddresses([]);
+    setSelectedAddressId('');
     setIsClearModalOpen(false);
   };
   
@@ -257,6 +261,16 @@ const App: React.FC = () => {
               >
                 🧾 GST Details
               </button>
+              <button
+                onClick={() => { setCurrentPage('merchants'); setSideNavOpen(false); }}
+                className={`w-full text-left p-3 rounded-lg transition-colors ${
+                  currentPage === 'merchants' 
+                    ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300' 
+                    : 'hover:bg-slate-100 dark:hover:bg-slate-700'
+                }`}
+              >
+                👥 Merchants
+              </button>
             </nav>
           </div>
         </div>
@@ -362,7 +376,7 @@ const App: React.FC = () => {
             </button>
           </div>
         </main>
-        ) : (
+        ) : currentPage === 'gst' ? (
         <main className="space-y-8">
         <center><b><h1>GST DETAILS</h1></b></center>
           <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-lg space-y-6">
@@ -419,6 +433,67 @@ const App: React.FC = () => {
                 </div>
               ) : null;
             })()}
+          </div>
+        </main>
+        ) : (
+        <main className="space-y-8">
+          <center><b><h1>MERCHANTS</h1></b></center>
+          <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-lg space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Search Address</label>
+              <SearchableSelect
+                options={Array.from(new Set(merchants.map(m => m.address))).map(address => {
+                  const count = merchants.filter(m => m.address === address).length;
+                  return { id: address, name: `${address} (${count})` };
+                })}
+                value={selectedAddressId}
+                onChange={(addressId) => {
+                  setSelectedAddressId(addressId);
+                  if (addressId && !selectedAddresses.includes(addressId)) {
+                    setSelectedAddresses(prev => [...prev, addressId]);
+                  }
+                }}
+                placeholder="Search and select address"
+              />
+              {selectedAddresses.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {selectedAddresses.map(address => {
+                    const count = merchants.filter(m => m.address === address).length;
+                    return (
+                      <span key={address} className="flex items-center bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-200 text-sm font-medium pl-3 pr-2 py-1 rounded-full">
+                        {address} ({count})
+                        <button 
+                          onClick={() => setSelectedAddresses(prev => prev.filter(a => a !== address))} 
+                          className="ml-2 -mr-1 flex-shrink-0 h-4 w-4 rounded-full inline-flex items-center justify-center text-indigo-500 hover:bg-indigo-200 dark:hover:bg-indigo-800 hover:text-indigo-600 dark:hover:text-indigo-100 focus:outline-none focus:bg-indigo-500 focus:text-white transition-colors"
+                        >
+                          <XIcon className="h-3 w-3" />
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            
+            {selectedAddresses.length > 0 && (
+              <div className="space-y-4">
+                {selectedAddresses.map(address => {
+                  const addressMerchants = merchants.filter(m => m.address === address);
+                  return (
+                    <div key={address} className="bg-slate-50 dark:bg-slate-700 p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold mb-3 text-slate-800 dark:text-slate-200">{address} ({addressMerchants.length})</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {addressMerchants.map(merchant => (
+                          <div key={merchant.id} className="bg-white dark:bg-slate-600 p-3 rounded border">
+                            <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{merchant.name}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </main>
         )}
