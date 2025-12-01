@@ -24,7 +24,7 @@ export const MERCHANTS: Merchant[] = [
  { id: '21', name: 'VENKATEWARA SAI GENERALS', gstin: '37AEMPV2104A1ZS', address: 'BHIMAVARAM', phone: '9959999546', phone2: '' },
  { id: '22', name: 'SIVA VENKATA NAGA TRADERS', gstin: '37AKCPT0199D1Z2', address: 'BHIMAVARAM', phone: '9440148702', phone2: '' },
  { id: '23', name: 'SRI KRISHNA MAHESWARAI TRADERS', gstin: '37DNOPS9606G1ZA', address: 'BHIMAVARAM', phone: '9441966333', phone2: '' },
- { id: '24', name: 'SRI JAYA DURGA TRADERS', gstin: '37CFGPI5672B1ZQ', address: 'BHIMAVARAM', phone: '9160464722', phone2: '' },
+ { id: '24', name: 'SRI JAYA DURGA TRADERS', gstin: '37CFGPA5672B1ZQ', address: 'BHIMAVARAM', phone: '9160464722', phone2: '' },
  { id: '25', name: 'KALYANI TRADERS', gstin: '37ANNPC0471F1Z7', address: 'BHIMAVARAM', phone: '9440188489', phone2: '9966419661' },
  { id: '26', name: 'SRI LAKSHMI SRINIVASA AGENCIES', gstin: '37AEXPC4872K1ZS', address: 'VEERAVASARAM', phone: '8985824143', phone2: '' },
  { id: '27', name: 'SRI MAVILAMMA GENERAL STORES', gstin: '37ABZPH8003Q1ZS', address: 'BHIMAVARAM', phone: '9248894434', phone2: '' },
