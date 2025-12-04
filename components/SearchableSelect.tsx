@@ -17,9 +17,12 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ options, val
   const [showAddressFilter, setShowAddressFilter] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState('');
   const [addressSearchTerm, setAddressSearchTerm] = useState('');
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [addressHighlightedIndex, setAddressHighlightedIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
   const addressDropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const [addressDropdownStyle, setAddressDropdownStyle] = useState<React.CSSProperties>({});
 
@@ -147,7 +150,84 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ options, val
     onChange(id);
     setSearchTerm('');
     setIsOpen(false);
+    setHighlightedIndex(-1);
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (showAddressFilter) {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setAddressHighlightedIndex(prev => 
+            prev < filteredAddresses.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setAddressHighlightedIndex(prev => 
+            prev > 0 ? prev - 1 : filteredAddresses.length - 1
+          );
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (addressHighlightedIndex >= 0 && filteredAddresses[addressHighlightedIndex]) {
+            handleAddressSelect(filteredAddresses[addressHighlightedIndex]);
+          }
+          break;
+        case 'Escape':
+          e.preventDefault();
+          setShowAddressFilter(false);
+          setAddressHighlightedIndex(-1);
+          inputRef.current?.focus();
+          break;
+      }
+    } else if (isOpen) {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setHighlightedIndex(prev => 
+            prev < filteredOptions.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setHighlightedIndex(prev => 
+            prev > 0 ? prev - 1 : filteredOptions.length - 1
+          );
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (highlightedIndex >= 0 && filteredOptions[highlightedIndex]) {
+            handleSelect(filteredOptions[highlightedIndex].id);
+          }
+          break;
+        case 'Escape':
+          e.preventDefault();
+          setIsOpen(false);
+          setHighlightedIndex(-1);
+          break;
+      }
+    } else {
+      switch (e.key) {
+        case 'ArrowDown':
+        case 'Enter':
+        case ' ':
+          e.preventDefault();
+          setIsOpen(true);
+          setHighlightedIndex(0);
+          break;
+      }
+    }
+  };
+
+  // Reset highlighted index when filtered options change
+  useEffect(() => {
+    setHighlightedIndex(-1);
+  }, [filteredOptions]);
+
+  useEffect(() => {
+    setAddressHighlightedIndex(-1);
+  }, [filteredAddresses]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -163,6 +243,8 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ options, val
     setShowAddressFilter(false);
     setSearchTerm('');
     setAddressSearchTerm('');
+    setAddressHighlightedIndex(-1);
+    inputRef.current?.focus();
   };
 
   const clearFilters = () => {
@@ -181,10 +263,12 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ options, val
     <div className="relative w-full" ref={wrapperRef}>
       <div className="relative">
          <input
+            ref={inputRef}
             type="text"
             value={displayValue}
             onChange={handleInputChange}
             onFocus={handleFocus}
+            onKeyDown={handleKeyDown}
             placeholder={placeholder}
             className={`w-full p-2 pr-20 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm ${!isOpen && selectedOption ? 'truncate' : ''}`}
         />
@@ -226,6 +310,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ options, val
               type="text"
               value={addressSearchTerm}
               onChange={handleAddressSearchChange}
+              onKeyDown={handleKeyDown}
               placeholder="Search addresses..."
               className="w-full p-2 text-sm bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               autoFocus
@@ -233,11 +318,15 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ options, val
           </div>
           <ul className="max-h-40 overflow-y-auto">
             {filteredAddresses.length > 0 ? (
-              filteredAddresses.map(address => (
+              filteredAddresses.map((address, index) => (
                 <li
                   key={address}
                   onClick={() => handleAddressSelect(address)}
-                  className="px-4 py-2 text-sm cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/50 text-slate-900 dark:text-white"
+                  className={`px-4 py-2 text-sm cursor-pointer text-slate-900 dark:text-white ${
+                    index === addressHighlightedIndex 
+                      ? 'bg-indigo-100 dark:bg-indigo-800' 
+                      : 'hover:bg-indigo-50 dark:hover:bg-indigo-900/50'
+                  }`}
                 >
                   📍 {address}
                 </li>
@@ -255,11 +344,15 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({ options, val
       {isOpen && !showAddressFilter && createPortal(
         <ul ref={dropdownRef} style={dropdownStyle} className="z-50 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {filteredOptions.length > 0 ? (
-            filteredOptions.map(opt => (
+            filteredOptions.map((opt, index) => (
               <li
                 key={opt.id}
                 onClick={() => handleSelect(opt.id)}
-                className="px-4 py-2 text-sm cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/50 text-slate-900 dark:text-white"
+                className={`px-4 py-2 text-sm cursor-pointer text-slate-900 dark:text-white ${
+                  index === highlightedIndex 
+                    ? 'bg-indigo-100 dark:bg-indigo-800' 
+                    : 'hover:bg-indigo-50 dark:hover:bg-indigo-900/50'
+                }`}
               >
                 <div className="truncate font-medium">{opt.name}</div>
                 {'address' in opt && opt.address && (

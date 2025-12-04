@@ -8,8 +8,10 @@ import { SearchableSelect } from './components/SearchableSelect';
 import { MultiSelect } from './components/MultiSelect';
 import { ConfirmModal } from './components/ConfirmModal';
 import { InvoiceTableFooter } from './components/InvoiceTableFooter';
+import { ThemeContext, useThemeProvider } from './hooks/useTheme';
+import { ThemeToggle } from './components/ThemeToggle';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [merchants] = useState<Merchant[]>(() => loadMerchants());
   const [products] = useState<Product[]>(() => loadProducts());
   
@@ -286,6 +288,7 @@ const App: React.FC = () => {
               <MenuIcon />
             </button>
             <div className="flex-1"></div>
+            <ThemeToggle />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">SIRI BROKERS</h1>
           <p className="text-indigo-600 dark:text-indigo-400 mt-2 font-semibold">connecting buyers and sellers</p>
@@ -570,6 +573,16 @@ const App: React.FC = () => {
         message="Are you sure you want to clear all data? This action cannot be undone."
       />
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  const themeValue = useThemeProvider();
+  
+  return (
+    <ThemeContext.Provider value={themeValue}>
+      <AppContent />
+    </ThemeContext.Provider>
   );
 };
 

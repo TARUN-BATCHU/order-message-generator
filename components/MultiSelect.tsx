@@ -11,8 +11,10 @@ interface MultiSelectProps {
 
 export const MultiSelect: React.FC<MultiSelectProps> = ({ options, selectedIds, onToggle }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
   useEffect(() => {
@@ -57,6 +59,57 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({ options, selectedIds, 
     }
   }, [isOpen]);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isOpen) {
+      switch (e.key) {
+        case 'ArrowDown':
+        case 'Enter':
+        case ' ':
+          e.preventDefault();
+          setIsOpen(true);
+          setHighlightedIndex(0);
+          break;
+      }
+    } else {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setHighlightedIndex(prev => 
+            prev < options.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setHighlightedIndex(prev => 
+            prev > 0 ? prev - 1 : options.length - 1
+          );
+          break;
+        case 'Enter':
+        case ' ':
+          e.preventDefault();
+          if (highlightedIndex >= 0 && options[highlightedIndex]) {
+            onToggle(options[highlightedIndex].id);
+          }
+          break;
+        case 'Escape':
+          e.preventDefault();
+          setIsOpen(false);
+          setHighlightedIndex(-1);
+          buttonRef.current?.focus();
+          break;
+      }
+    }
+  };
+
+  // Reset highlighted index when dropdown opens
+  useEffect(() => {
+    if (isOpen) {
+      setHighlightedIndex(0);
+    } else {
+      setHighlightedIndex(-1);
+    }
+  }, [isOpen]);
+
   const displayLabel = selectedIds.length === 0
     ? 'Select products...'
     : selectedIds.length === 1
@@ -66,8 +119,10 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({ options, selectedIds, 
   return (
     <div className="relative w-full" ref={wrapperRef}>
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
+        onKeyDown={handleKeyDown}
         className="w-full flex justify-between items-center p-2 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
       >
         <span className="truncate">{displayLabel}</span>
@@ -76,16 +131,21 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({ options, selectedIds, 
 
       {isOpen && createPortal(
         <div ref={dropdownRef} style={dropdownStyle} className="z-50 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-          {options.map(opt => (
+          {options.map((opt, index) => (
             <label
               key={opt.id}
-              className="flex items-center px-4 py-2 text-sm cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/50 text-slate-900 dark:text-white"
+              className={`flex items-center px-4 py-2 text-sm cursor-pointer text-slate-900 dark:text-white ${
+                index === highlightedIndex 
+                  ? 'bg-indigo-100 dark:bg-indigo-800' 
+                  : 'hover:bg-indigo-50 dark:hover:bg-indigo-900/50'
+              }`}
             >
               <input
                 type="checkbox"
                 checked={selectedIds.includes(opt.id)}
                 onChange={() => onToggle(opt.id)}
                 className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                tabIndex={-1}
               />
               <span className="ml-3">{opt.name}</span>
             </label>
