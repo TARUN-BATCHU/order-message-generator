@@ -444,6 +444,8 @@ export const MERCHANTS: Merchant[] = [
  { id: '441', name: 'SHANMUKA INDUSTRIES', gstin: '37DJPPM2102G1ZA', address: 'VIJAYAWADA', phone: '9542411198', phone2: '' },
  { id: '442', name: 'SRI SELVA VINAYAKA TRADERS', gstin: '', address: 'KATPADI', phone: '9488856627', phone2: '' },
  { id: '443', name: 'GIDDAYA TRADERS', gstin: '', address: 'KODUMURU', phone: '', phone2: '' },
+ { id: '444', name: 'VIJAYA LAKSHMI DALL AND FLOUR MILL', gstin: '37AADFV7726M1ZJ', address: 'Tenali', phone: '9866239688', phone2: '' },
+
 ];
 
 export const PRODUCTS: Product[] = [
