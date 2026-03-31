@@ -435,7 +435,7 @@ export const MERCHANTS: Merchant[] = [
  { id: '432', name: 'SRINIVASA MANIKUMAR BANDI', gstin: '37ABSPB3298C3ZH', address: 'VIJAYAWADA', phone: '9396431037', phone2: '' },
  { id: '433', name: 'Raghavendra oil and agro products', gstin: '37aajfr6566m1zd', address: 'chebrolu', phone: '92465 24659', phone2: '' },
  { id: '434', name: 'SRI VENKATA HANUMAN TRADING COMPANY', gstin: '37ADIFS2109Q1ZJ', address: 'SURAMPALLI', phone: '7893388575', phone2: '' },
- { id: '435', name: 'RAMAKRISHNA TRADERS', gstin: '37AADPY7812M1ZD', address: 'VIJAYAWADA', phone: '9440831426', phone2: 'VIJAYAWADA' },
+ { id: '435', name: 'RAMAKRISHNA TRADERS', gstin: '37AADPY7812M1Z0', address: 'VIJAYAWADA', phone: '9440831426', phone2: 'VIJAYAWADA' },
  { id: '436', name: '.', gstin: '.', address: '.', phone: '.', phone2: '.' },
  { id: '437', name: 'SRI CHIDAKSH INDUSTRIES', gstin: '37BUFPP8948A1ZB', address: 'VIJAYAWADA', phone: '9861849999', phone2: '' },
  { id: '438', name: 'SRI LAKSHMI DURGA TRADERS', gstin: '37AGYPT5630R1Z2', address: 'KOLLURU', phone: '9550892822', phone2: '' },
